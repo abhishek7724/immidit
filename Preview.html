@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en"><head><base target="_top"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>immidit Operations</title>
+<style>
+    :root{
+      --ink:#0A1C2B;--ink2:#183744;--muted:#657982;--line:#E5EDF0;--bg:#F5F9FA;
+      --brand:#FF6B35;--brandSoft:#FFF1EB;--green:#148468;--greenSoft:#EAF8F3;
+      --amber:#A66B13;--amberSoft:#FFF6E5;--red:#B84545;--redSoft:#FFF0F0;--white:#fff;
+      --shadow:0 15px 38px rgba(13,38,50,.07);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}
+    button,input,select{font:inherit}
+    .shell{display:grid;grid-template-columns:246px 1fr;min-height:100vh}
+    aside{background:#071923;color:#fff;padding:22px 16px;position:sticky;top:0;height:100vh;z-index:5}
+    .brand{display:flex;align-items:center;gap:11px;padding:4px 9px 25px}
+    .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#ff6430,#ff9a61);display:grid;place-items:center;font:800 24px Manrope}
+    .brand strong{font:800 23px Manrope;letter-spacing:-.8px}.brand small{display:block;color:#91A5AD;margin-top:0;font-size:10px}
+    nav{display:grid;gap:6px}
+    nav button{border:0;background:transparent;color:#9FB1B8;border-radius:11px;padding:11px 12px;text-align:left;cursor:pointer;font-weight:650}
+    nav button:hover,nav button.active{background:#102E39;color:#fff}
+    .nav-icon{width:22px;display:inline-block;text-align:center;margin-right:4px}
+    .aside-foot{position:absolute;bottom:20px;left:22px;color:#758D96;font-size:11px;line-height:1.55}
+    main{padding:28px 34px 60px;min-width:0}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:24px}
+    h1{font:800 28px Manrope;margin:0;letter-spacing:-.9px}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:5px}
+    .top-actions{display:flex;gap:9px;align-items:center}
+    .btn{border:0;border-radius:11px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .btn.primary{background:var(--brand);color:#fff;box-shadow:0 8px 20px rgba(255,107,53,.18)}
+    .btn.secondary{background:#fff;border:1px solid var(--line);color:var(--ink)}
+    .btn.danger{background:var(--redSoft);color:var(--red)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .page{display:none}.page.active{display:block}
+    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+    .metric,.card,.hero{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}
+    .metric{padding:17px}.metric label{font-size:11px;color:var(--muted);font-weight:700}.metric b{display:block;font:800 27px Manrope;margin-top:6px}
+    .metric small{display:block;margin-top:7px;color:var(--green);font-size:10px}
+    .hero{padding:18px 20px;margin-bottom:16px;background:linear-gradient(135deg,#fff7f3,#fff)}
+    .hero h2{font:800 19px Manrope;margin:0 0 4px}.hero p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+    .grid{display:grid;grid-template-columns:1.28fr .72fr;gap:17px}
+    .card{overflow:hidden}
+    .card-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .card-head h3{margin:0;font:700 14px Manrope}.card-head span{font-size:11px;color:var(--muted)}
+    .toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:13px;align-items:center}
+    .field{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 11px;min-width:180px;color:var(--ink)}
+    .field.search{min-width:240px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px 14px;border-bottom:1px solid #EDF2F4;text-align:left;font-size:11.5px;vertical-align:middle}
+    th{background:#FBFCFD;color:#6C7D84;font-weight:750;white-space:nowrap}
+    tbody tr:hover{background:#FBFDFD}
+    td strong{font-weight:700}
+    .status{display:inline-flex;border-radius:999px;padding:5px 8px;font-size:9.5px;font-weight:800;white-space:nowrap}
+    .status.healthy,.status.ready,.status.active{background:var(--greenSoft);color:var(--green)}
+    .status.low,.status.below-standard{background:var(--amberSoft);color:var(--amber)}
+    .status.planned{background:#EEF2FF;color:#5865A9}.status.inactive{background:#F1F3F4;color:#78858A}
+    .avatar{width:30px;height:30px;border-radius:50%;display:inline-grid;place-items:center;background:#EDF4F5;color:#294550;font-weight:800;margin-right:8px}
+    .nurse-line{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+    .nurse-line .grow{flex:1}.nurse-line b{font-size:11.5px}.nurse-line span{font-size:10px;color:var(--muted)}
+    .number{font-weight:800}
+    .hub-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .hub-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+    .hub-card h3{font:750 15px Manrope;margin:0 0 3px}.hub-card .meta{font-size:11px;color:var(--muted);line-height:1.6}.hub-card .actions{margin-top:14px;display:flex;justify-content:space-between;align-items:center}
+    .tiny{border:0;background:transparent;color:var(--red);font-weight:700;font-size:10px;cursor:pointer}
+    .qty{width:76px;border:1px solid var(--line);border-radius:9px;padding:8px 9px;background:#fff}
+    .qty:focus{outline:2px solid rgba(255,107,53,.16);border-color:var(--brand)}
+    .readonly{font-weight:750;color:#344E59}
+    .positive{color:var(--green);font-weight:800}.negative{color:var(--red);font-weight:800}
+    .empty{padding:38px;text-align:center;color:var(--muted);font-size:12px}
+    .section-gap{margin-top:17px}
+    .hint{font-size:10.5px;color:var(--muted);margin-left:auto}
+    .drawer{position:fixed;right:0;top:0;width:min(460px,100%);height:100%;background:#fff;z-index:30;box-shadow:-22px 0 60px rgba(7,25,35,.18);padding:24px;transform:translateX(100%);transition:.24s;overflow:auto}
+    .drawer.open{transform:translateX(0)}
+    .shade{position:fixed;inset:0;background:rgba(7,25,35,.34);display:none;z-index:29}.shade.show{display:block}
+    .drawer h2{font:800 21px Manrope;margin:0 0 3px}.drawer .lead{color:var(--muted);font-size:12px}
+    .form{display:grid;gap:12px;margin-top:19px}.form label{font-size:10.5px;font-weight:750;color:#60737C}
+    .form input,.form select{display:block;width:100%;margin-top:5px;border:1px solid var(--line);border-radius:10px;padding:11px}
+    .savebar{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+    .toast{position:fixed;right:22px;bottom:22px;z-index:50;background:#09222D;color:#fff;padding:12px 14px;border-radius:11px;box-shadow:var(--shadow);font-size:11px;display:none;max-width:390px}
+    .loader{padding:34px;text-align:center;color:var(--muted);font-size:11px}
+    .split-title{display:flex;justify-content:space-between;align-items:end;margin:16px 0 10px}.split-title h3{font:750 14px Manrope;margin:0}.split-title span{font-size:10px;color:var(--muted)}
+    .notice{padding:10px 12px;border-radius:10px;background:var(--amberSoft);color:#805613;font-size:10.5px;margin-bottom:12px;display:none}
+    @media(max-width:1080px){.shell{grid-template-columns:82px 1fr}.brand strong,.brand small,.nav-label,.aside-foot{display:none}.brand{justify-content:center}.metrics{grid-template-columns:repeat(2,1fr)}.hub-cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+    @media(max-width:720px){.shell{display:block}aside{height:auto;position:static;padding:10px;display:flex;align-items:center;gap:8px}.brand{padding:0}.logo{width:33px;height:33px}nav{display:flex;overflow:auto}.nav-label{display:inline}nav button{white-space:nowrap;padding:9px}main{padding:18px 12px 70px}.topbar{display:block}.top-actions{margin-top:12px}.metrics{grid-template-columns:1fr 1fr}.hub-cards{grid-template-columns:1fr}.field,.field.search{min-width:0;flex:1}.card{overflow:auto}th,td{white-space:nowrap}}
+  
+body{font-size:14px}h1{font-family:Inter,system-ui,sans-serif}.topbar{align-items:center}.top-actions{flex-wrap:wrap;justify-content:flex-end}.top-actions label{font-size:11px;color:var(--muted);display:grid;gap:5px}.top-actions .field{min-width:210px}.sync-line{display:flex;align-items:center;gap:8px;justify-content:flex-end;font-size:11px;color:var(--muted);margin:-12px 0 22px}.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green)}.sync-dot.warn{background:var(--amber)}.card{overflow:auto}.hero{display:flex;justify-content:space-between;align-items:center;gap:16px}.hero p{font-size:13px}.metric label{font-size:11px}.metric small{font-size:11px}th,td{font-size:12px}.muted{color:var(--muted);font-size:12px}.empty{font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap}.table-footer{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;position:sticky;bottom:0}.banner{margin-bottom:14px;padding:13px 16px;border:1px solid #eed7ad;border-radius:12px;background:var(--amberSoft);color:#69470f;font-size:13px;line-height:1.5}.banner.error{background:var(--redSoft);color:#842d2d;border-color:#efc9c9}.banner button{margin-left:8px}.tag{padding:4px 7px;border-radius:6px;background:#eef4f5;font-size:11px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 10px}.section-title h2{font-size:16px;margin:0}.person{display:flex;align-items:center;gap:6px}.person .avatar{flex-shrink:0}.btn.small{padding:7px 10px;font-size:12px}.status{font-size:10px}.qty{width:90px}.qty[aria-invalid=true]{border-color:var(--red);background:var(--redSoft)}.form label{font-size:12px}.form .check{display:flex;gap:8px;align-items:center}.form .check input{width:auto;margin:0}.form .hub-checks{display:grid;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px}.drawer .close{float:right;background:transparent;border:0;font-size:24px;cursor:pointer}.drawer{width:min(560px,100%)}.drawer .table-footer{padding:12px 0}.drawer:focus{outline:none}.aside-foot{right:18px}.aside-foot b{display:block;color:#bccbd0;margin-bottom:5px;font-weight:500;overflow-wrap:anywhere}.nav-label{font-size:13px}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #f9a37e;outline-offset:2px}.loading-block{height:110px;display:grid;place-items:center;color:var(--muted)}[hidden]{display:none!important}.banner ul{padding-left:18px;margin:8px 0 0}.welcome{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:8px}.count{font-variant-numeric:tabular-nums}.nav-section{font-size:9px;letter-spacing:1.6px;color:#718c97;padding:16px 12px 6px}.hero h2{font-family:system-ui,sans-serif}.replenish{margin-top:16px}#toast{font-size:13px;max-width:480px}.drawer table th,.drawer table td{padding:10px 8px}.bottom-help{color:var(--muted);font-size:11px;margin-top:22px;line-height:1.6}.toolbar label{display:flex;align-items:center;gap:8px;font-size:12px}.grid.equal{grid-template-columns:1fr 1fr}.error-text{color:var(--red)}
+.brand strong,.logo,.metric b,.card-head h3,.hub-card h3{font-family:Inter,system-ui,sans-serif}
+@media(max-width:1080px){.nav-section{display:none}.grid.equal{grid-template-columns:1fr}.nav-icon{font-size:16px}}
+@media(max-width:720px){.top-actions{justify-content:flex-start}.top-actions label{flex:1}.top-actions .field{width:100%;min-width:0}.sync-line{justify-content:flex-start;margin:12px 0 18px}.hero{align-items:flex-start;flex-direction:column}.table-footer{position:static;align-items:flex-start;flex-direction:column}.nav-icon{display:none}.metrics{gap:8px}.metric{padding:12px}.metric b{font-size:25px}.topbar h1{font-size:25px}nav{flex:1}.brand{flex-shrink:0}.hero p{line-height:1.6}.toolbar label{width:100%}.field.search{flex-basis:100%}.drawer{padding:20px}.aside-foot{display:none}}
+</style></head><body><div style="padding:10px 18px;background:#fff1eb;color:#803912;font:13px system-ui;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><strong>Interactive sample preview</strong><span>No live data. Changes reset on reload.</span><button type="button" id="previewRole" style="margin-left:auto;border:1px solid #eac0ac;background:white;padding:7px 10px;border-radius:8px;cursor:pointer">Try manager view</button></div>
+<div class="shell">
+<aside><div class="brand"><div class="logo">i</div><div><strong>immidit</strong><small>OPERATIONS</small></div></div>
+<nav id="nav" aria-label="Main navigation">
+<div class="nav-section">DAILY OPERATIONS</div>
+<button data-page="dashboard" class="active"><span class="nav-icon">◫</span><span class="nav-label">Overview</span></button>
+<button data-page="inventory"><span class="nav-icon">▦</span><span class="nav-label">Hub inventory</span></button>
+<button data-page="issue"><span class="nav-icon">↗</span><span class="nav-label">Morning issue</span></button>
+<button data-page="nurseStock"><span class="nav-icon">▤</span><span class="nav-label">Nurse stock</span></button>
+<button data-page="closing"><span class="nav-icon">✓</span><span class="nav-label">Day closing</span></button>
+<div class="nav-section">PEOPLE & ACCESS</div>
+<button data-page="team"><span class="nav-icon">♙</span><span class="nav-label">Nurses</span></button>
+<button data-page="managers" data-admin hidden><span class="nav-icon">♧</span><span class="nav-label">Managers</span></button>
+<button data-page="hubs"><span class="nav-icon">⌂</span><span class="nav-label">Hubs</span></button>
+<button data-page="activity"><span class="nav-icon">≡</span><span class="nav-label">Activity</span></button>
+</nav><div class="aside-foot"><b id="identity">Signing in…</b>Operations V3<br>Hub → Nurse → Day closing</div></aside>
+<main><div class="topbar"><div><div class="welcome">Your operations workspace</div><h1 id="pageTitle">Operations overview</h1><div class="subtitle" id="pageSubtitle">A clear view of stock, people and today’s work.</div></div>
+<div class="top-actions"><label>Working hub<select id="globalHub" class="field" aria-label="Working hub" disabled><option>Loading hubs…</option></select></label><button id="receiveButton" class="btn primary" data-action="receive" disabled>+ Receive stock</button></div></div>
+<div class="sync-line" role="status" aria-live="polite"><span id="syncDot" class="sync-dot"></span><span id="syncText">Connecting to your inventory…</span><button class="btn secondary small" id="syncButton" data-action="sync">↻ Sync</button></div>
+<div id="message" aria-live="polite"></div><div id="pendingBanner" aria-live="polite"></div>
+<div id="content"><div class="card loading-block">Loading your workspace…</div></div>
+<div class="bottom-help">Stock is saved to your shared backend. Keep physical counts up to date and close each nurse’s day before the next issue.</div>
+</main></div>
+<div class="shade" id="shade"></div><div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" tabindex="-1"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>/* Standalone sample environment. This preview never connects to Google Sheets. */
+window.google={script:{run:(()=>{
+  const api=(()=>{
+    const tables={};let nextId=1;
+    class DemoSheet {
+      constructor(name){this.name=name;this.id=nextId++;this.values=[];}
+      getDataRange(){return {getValues:()=>structuredClone(this.values.length?this.values:[['']])};}
+      getRange(row,col){return {setValues:values=>values.forEach((r,i)=>r.forEach((v,j)=>{this.values[row-1+i]??=[];this.values[row-1+i][col-1+j]=v;}))};}
+      getLastRow(){return this.values.length;}getMaxRows(){return 10000;}getSheetId(){return this.id;}setFrozenRows(){}
+    }
+    const SpreadsheetApp={openById:()=>({getSheetByName:n=>tables[n],insertSheet:n=>(tables[n]=new DemoSheet(n))}),flush(){}};
+    const PropertiesService={getScriptProperties:()=>({getProperty:k=>k==='ADMIN_EMAILS'?'demo@immidit.example':null})};
+    const Session={getActiveUser:()=>({getEmail:()=>window.previewRole==='Manager'?'manager@immidit.example':'demo@immidit.example'})};
+    const LockService={getScriptLock:()=>({waitLock(){},releaseLock(){}})};
+    const Utilities={getUuid:()=>crypto.randomUUID(),DigestAlgorithm:{SHA_256:'demo'},computeDigest:(_,s)=>s,base64Encode:s=>btoa(unescape(encodeURIComponent(s))),formatDate:(date,tz,format)=>{const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(date).map(p=>[p.type,p.value]));const d=p.year+'-'+p.month+'-'+p.day;return format==='yyyy-MM-dd'?d:d+' '+p.hour+':'+p.minute+':'+p.second;}};
+    const Sheets={Spreadsheets:{batchUpdate({requests}){const staged=Object.fromEntries(Object.values(tables).map(s=>[s.id,structuredClone(s.values)]));requests.forEach(req=>{if(req.appendDimension)return;const u=req.updateCells,values=staged[u.start.sheetId];u.rows.forEach((row,i)=>row.values.forEach((cell,j)=>{values[u.start.rowIndex+i]??=[];const v=cell.userEnteredValue;values[u.start.rowIndex+i][u.start.columnIndex+j]=v?(v.numberValue??v.stringValue??v.boolValue):'';}));});Object.values(tables).forEach(s=>s.values=staged[s.id]);return {};}}};
+    /* immidit Operations V3. All browser writes enter mutate(); helpers are private. */
+const DEFAULT_SPREADSHEET_ID_ = '18ncmaBPgKyn4BQ1EJg7KuXZW7KiDHjLf8udk4BAEcRM';
+const TZ_ = 'Asia/Kolkata';
+const SCHEMA_ = {
+  'Hubs': ['Hub ID','Hub Name','City','Manager','Status','Created At'],
+  'Nurses': ['Nurse ID','Nurse Name','Hub ID','Phone','Kit Type','Status','Area'],
+  'Items': ['SKU','Item Name','Category','UOM','Unit Cost','Reorder Level','Batch Tracked','Expiry Tracked','Status','Notes'],
+  'Nurse Standard Kit': ['Kit Type','SKU','Item Name','Standard Qty','Active'],
+  'Hub Stock': ['Hub ID','SKU','Item Name','On Hand','Reserved','Available','Last Updated','Status'],
+  'Daily Nurse Inventory': ['Date','Hub ID','Nurse ID','Nurse Name','SKU','Item Name','Opening','Issued','Closing','Consumed','Variance','Status'],
+  'Stock Transactions': ['Transaction ID','Timestamp','Hub ID','Transaction Type','SKU','Item Name','Quantity','Signed Quantity','Balance After','Reference','User','Batch','Expiry','Notes'],
+  'Nurse Stock': ['Hub ID','Nurse ID','Nurse Name','SKU','Item Name','On Hand','Standard Qty','Last Updated'],
+  'Nurse Stock History': ['Event ID','Timestamp','Date','Hub ID','Nurse ID','Nurse Name','Event Type','SKU','Item Name','Qty','Nurse Balance','Notes'],
+  'Managers': ['Manager ID','Manager Name','Email','Default Hub ID','Hub IDs','Status','Created At'],
+  'Operation Requests': ['Request ID','User','Action','Fingerprint','Result','Timestamp'],
+  'App State': ['Key','Value'],
+  'Audit Log': ['Event ID','Timestamp','User','Action','Hub ID','Reference','Details']
+};
+function spreadsheetId_() { return PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID') || DEFAULT_SPREADSHEET_ID_; }
+function today_() { return Utilities.formatDate(new Date(), TZ_, 'yyyy-MM-dd'); }
+function stamp_() { return Utilities.formatDate(new Date(), TZ_, 'yyyy-MM-dd HH:mm:ss'); }
+function day_(v) { return v instanceof Date ? Utilities.formatDate(v,TZ_,'yyyy-MM-dd') : String(v || '').slice(0,10); }
+function safe_(v) {
+  if (v instanceof Date) return Utilities.formatDate(v,TZ_,'yyyy-MM-dd HH:mm:ss');
+  if (Array.isArray(v)) return v.map(safe_);
+  if (v && typeof v === 'object') return Object.fromEntries(Object.keys(v).filter(k=>k[0]!=='_').map(k=>[k,safe_(v[k])]));
+  return v;
+}
+function require_(yes, message) { if (!yes) throw new Error(message); }
+function text_(v, label, required) {
+  const s = String(v == null ? '' : v).trim();
+  require_(!required || s, label + ' is required.');
+  require_(s.length <= 250, label + ' must be 250 characters or fewer.'); return s;
+}
+function qty_(v, label, positive) {
+  require_(v !== '' && v !== null && v !== undefined && typeof v !== 'boolean', label + ': enter a quantity.');
+  const n = Number(v); require_(Number.isSafeInteger(n) && n >= (positive ? 1 : 0), label + ': use a ' + (positive ? 'positive' : 'non-negative') + ' whole number.'); return n;
+}
+function key_(r, fields) { return fields.map(f=>f==='Date'?day_(r[f]):String(r[f])).join('\u001f'); }
+
+// A request-local table cache. Reads never seed history or modify the spreadsheet.
+class Store_ {
+  constructor() { this.ss=SpreadsheetApp.openById(spreadsheetId_()); this.tables={}; }
+  table(name) {
+    if(this.tables[name]) return this.tables[name];
+    const sh=this.ss.getSheetByName(name); require_(sh, 'Run setup in Apps Script first. Missing tab: '+name);
+    const values=sh.getDataRange().getValues(), headers=values[0].map(String);
+    (SCHEMA_[name]||[]).forEach(h=>require_(headers.includes(h),name+': missing column '+h));
+    const rows=values.slice(1).map((v,i)=>Object.assign({_row:i+2},Object.fromEntries(headers.map((h,j)=>[h,v[j]??''])))).filter(r=>headers.some(h=>r[h]!==''));
+    return this.tables[name]={sh,headers,rows,original:JSON.parse(JSON.stringify(rows)),lastRow:sh.getLastRow()};
+  }
+  rows(name) { return this.table(name).rows; }
+  add(name, values) { const t=this.table(name), r={...values,_row:t.lastRow+1}; t.lastRow++; t.rows.push(r); return r; }
+  unique(name, fields) {
+    const seen=new Set(); this.rows(name).forEach(r=>{const k=key_(r,fields); require_(!seen.has(k),name+': duplicate record '+k.replace(/\u001f/g,' / ')+'. Resolve it before saving.');seen.add(k);});
+  }
+  commit() {
+    const requests=[];
+    Object.values(this.tables).forEach(t=>{
+      const id=t.sh.getSheetId(), before=new Map(t.original.map(r=>[r._row,r]));
+      if(t.lastRow>t.sh.getMaxRows()) requests.push({appendDimension:{sheetId:id,dimension:'ROWS',length:t.lastRow-t.sh.getMaxRows()}});
+      const added=[];
+      t.rows.forEach(r=>{
+        const old=before.get(r._row);
+        if(!old) { added.push(r); return; }
+        // Only changed fields: preserve formulas and unrelated columns in existing rows.
+        t.headers.forEach((h,col)=>{
+          if(JSON.stringify(r[h])===JSON.stringify(old[h])) return;
+          requests.push({updateCells:{start:{sheetId:id,rowIndex:r._row-1,columnIndex:col},rows:[{values:[cell_(r[h])]}],fields:'userEnteredValue'}});
+        });
+      });
+      if(added.length) requests.push({updateCells:{start:{sheetId:id,rowIndex:added[0]._row-1,columnIndex:0},rows:added.map(r=>({values:t.headers.map(h=>cell_(r[h]))})),fields:'userEnteredValue'}});
+    });
+    // Inventory, history, audit, revision and retry receipt succeed together or not at all.
+    if(requests.length) Sheets.Spreadsheets.batchUpdate({requests},spreadsheetId_());
+  }
+}
+function cell_(v) {
+  if(v===undefined || v===null || v==='') return {};
+  if(v instanceof Date) v=Utilities.formatDate(v,TZ_,'yyyy-MM-dd HH:mm:ss');
+  return {userEnteredValue:typeof v==='number'?{numberValue:v}:typeof v==='boolean'?{boolValue:v}:{stringValue:String(v)}};
+}
+
+// Public editor entry point. setup_ enforces configured administrator identity.
+function setup() {
+  return setup_();
+}
+
+// Private implementation; every entry path checks ADMIN_EMAILS before writing.
+function setup_() {
+  const email=String(Session.getActiveUser().getEmail()||'').toLowerCase();
+  require_(adminEmails_().includes(email),'Set ADMIN_EMAILS in Script Properties to your signed-in Google email before running setup.');
+  const lock=LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const ss=SpreadsheetApp.openById(spreadsheetId_());
+    Object.entries(SCHEMA_).forEach(([name,headers])=>{
+      let sh=ss.getSheetByName(name);
+      if(!sh) sh=ss.insertSheet(name);
+      if(!sh.getLastRow()) {sh.getRange(1,1,1,headers.length).setValues([headers]);sh.setFrozenRows(1);}
+    });
+    SpreadsheetApp.flush();
+    const db=new Store_(); Object.keys(SCHEMA_).forEach(n=>db.table(n));
+    if(!db.rows('App State').some(r=>r.Key==='revision')) db.add('App State',{Key:'revision',Value:0});
+    db.commit();
+    return 'V3 schema ready. Existing stock, dates, formulas and history were preserved.';
+  } finally {lock.releaseLock();}
+}
+function adminEmails_() {return String(PropertiesService.getScriptProperties().getProperty('ADMIN_EMAILS')||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean);}
+function actor_(db) {
+  const email=String(Session.getActiveUser().getEmail()||'').toLowerCase();
+  require_(email,'Your Google identity is unavailable. Ask the administrator to check the web app deployment and sign in with your work account.');
+  if(adminEmails_().includes(email)) return {email,name:email.split('@')[0],role:'Admin',hubIds:db.rows('Hubs').map(h=>String(h['Hub ID'])),defaultHubId:''};
+  db.unique('Managers',['Email']);
+  const m=db.rows('Managers').find(r=>String(r.Email).toLowerCase()===email && r.Status==='Active');
+  require_(m,'No active manager access for this Google account. Ask an administrator to add you.');
+  return {email,name:m['Manager Name'],role:'Manager',hubIds:String(m['Hub IDs']).split(',').map(x=>x.trim()).filter(Boolean),defaultHubId:String(m['Default Hub ID'])};
+}
+function hub_(db,a,id,active=true) {
+  const h=db.rows('Hubs').find(r=>String(r['Hub ID'])===String(id));
+  require_(h && (a.role==='Admin'||a.hubIds.includes(String(id))),'This hub is not available to your account.');
+  require_(!active||h.Status==='Active','This hub is inactive.'); return h;
+}
+function nurse_(db,a,id,active=true) {
+  const n=db.rows('Nurses').find(r=>String(r['Nurse ID'])===String(id));
+  require_(n,'Nurse not found.');hub_(db,a,n['Hub ID'],active);
+  require_(!active||n.Status==='Active','This nurse has been offboarded.'); return n;
+}
+function admin_(a) {require_(a.role==='Admin','Only an administrator can manage hubs and manager access.');}
+function revision_(db) { const r=db.rows('App State').find(r=>r.Key==='revision');require_(r,'Run setup before opening the app.'); return r; }
+function doGet() { return HtmlService.createHtmlOutputFromFile('Index').setTitle('immidit Operations'); }
+function getSnapshot() {
+  const lock=LockService.getScriptLock();lock.waitLock(20000);
+  try {const db=new Store_();return safe_(snapshot_(db,actor_(db)));} finally {lock.releaseLock();}
+}
+function snapshot_(db,a) {
+  const hubs=db.rows('Hubs').filter(h=>a.role==='Admin'||a.hubIds.includes(String(h['Hub ID']))), ids=new Set(hubs.map(h=>String(h['Hub ID'])));
+  const inHub=r=>ids.has(String(r['Hub ID']));
+  const items=db.rows('Items');
+  const stock=db.rows('Hub Stock').filter(inHub).map(r=>({...r,Available:Number(r['On Hand'])-Number(r.Reserved||0),Status:Number(r['On Hand'])-Number(r.Reserved||0)<=Number((items.find(i=>i.SKU===r.SKU)||{})['Reorder Level']||0)?'Low':'Healthy'}));
+  return {today:today_(),syncedAt:stamp_(),revision:Number(revision_(db).Value),actor:a,hubs,nurses:db.rows('Nurses').filter(inHub),items,kits:db.rows('Nurse Standard Kit'),stock,nurseStock:db.rows('Nurse Stock').filter(inHub),daily:db.rows('Daily Nurse Inventory').filter(inHub),managers:a.role==='Admin'?db.rows('Managers'):[],audit:db.rows('Audit Log').filter(r=>a.role==='Admin'||inHub(r)).slice(-60).reverse()};
+}
+function getNurseHistory(nurseId,days) {
+  const db=new Store_(), a=actor_(db);nurse_(db,a,nurseId,false);
+  const span=[10,20,30].includes(Number(days))?Number(days):10;
+  const cutoff=new Date(today_()+'T00:00:00+05:30');cutoff.setDate(cutoff.getDate()-span+1);
+  return safe_(db.rows('Nurse Stock History').filter(r=>String(r['Nurse ID'])===String(nurseId)&&day_(r.Date)>=day_(cutoff)).sort((a,b)=>String(safe_(b.Timestamp)).localeCompare(String(safe_(a.Timestamp)))));
+}
+
+function mutate(request) {
+  require_(request && /^[a-zA-Z0-9-]{16,80}$/.test(request.id||''),'Missing save identifier. Reload and try again.');
+  const actions={receive:receive_,issue:issue_,close:close_,returnStock:return_,addNurse:addNurse_,offboardNurse:offboard_,addManager:addManager_,updateManager:updateManager_,addHub:addHub_,archiveHub:archiveHub_};
+  require_(Object.prototype.hasOwnProperty.call(actions,request.action),'Unknown operation.');
+  const lock=LockService.getScriptLock();lock.waitLock(20000);
+  let commitAttempted=false;
+  try {
+    const db=new Store_(),a=actor_(db),p=request.payload||{};
+    const fingerprint=Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,JSON.stringify([request.action,p])));
+    const saved=db.rows('Operation Requests').find(r=>r['Request ID']===request.id);
+    if(saved) {
+      require_(saved.User===a.email&&saved.Fingerprint===fingerprint,'This save identifier has already been used for different data.');
+      return {ok:true,replayed:true,result:JSON.parse(saved.Result),snapshot:safe_(snapshot_(db,a))};
+    }
+    require_(Number.isInteger(request.revision)&&request.revision===Number(revision_(db).Value),'STALE: Stock or access changed since you loaded it. Sync and review your quantities before saving again.');
+    [['Hubs',['Hub ID']],['Nurses',['Nurse ID']],['Items',['SKU']],['Hub Stock',['Hub ID','SKU']],['Nurse Stock',['Nurse ID','SKU']],['Daily Nurse Inventory',['Date','Nurse ID','SKU']],['Nurse Standard Kit',['Kit Type','SKU']]].forEach(([n,keys])=>db.unique(n,keys));
+    const result=actions[request.action](db,a,p)||{};
+    revision_(db).Value=Number(revision_(db).Value)+1;
+    db.add('Audit Log',{'Event ID':Utilities.getUuid(),Timestamp:stamp_(),User:a.email,Action:request.action,'Hub ID':result.hubId||p.hubId||'',Reference:result.id||p.nurseId||p.managerId||'',Details:result.message||''});
+    db.add('Operation Requests',{'Request ID':request.id,User:a.email,Action:request.action,Fingerprint:fingerprint,Result:JSON.stringify(result),Timestamp:stamp_()});
+    commitAttempted=true;
+    db.commit();
+    // The client receives its fresh state in the save response, without a second sync trip.
+    return {ok:true,result,snapshot:safe_(snapshot_(db,a))};
+  } catch(e) {return {ok:false,error:String(e.message||e),uncertain:commitAttempted};}
+  finally {lock.releaseLock();}
+}
+function item_(db,sku,active=true) { const i=db.rows('Items').find(r=>String(r.SKU)===String(sku)); require_(i&&(!active||i.Status==='Active'),'Item is missing or inactive: '+sku);return i; }
+function hubStock_(db,hubId,sku) {
+  const r=db.rows('Hub Stock').find(r=>String(r['Hub ID'])===String(hubId)&&String(r.SKU)===String(sku));
+  require_(r,'Hub stock row missing for '+sku+'. Ask an administrator to reconcile the backend.');return r;
+}
+function moveHub_(db,a,hubId,sku,delta,type,ref,notes) {
+  const r=hubStock_(db,hubId,sku), item=item_(db,sku,false),onHand=qty_(r['On Hand'],sku+' stock'),reserved=qty_(r.Reserved||0,sku+' reserved');
+  require_(Number.isSafeInteger(onHand+delta),'Resulting stock exceeds the supported whole-number range.');
+  require_(onHand+delta>=reserved,sku+': insufficient available hub stock.');
+  r['On Hand']=onHand+delta;r.Available=r['On Hand']-reserved;r['Last Updated']=stamp_();r.Status=r.Available<=Number(item['Reorder Level']||0)?'Low':'Healthy';
+  db.add('Stock Transactions',{'Transaction ID':Utilities.getUuid(),Timestamp:stamp_(),'Hub ID':hubId,'Transaction Type':type,SKU:sku,'Item Name':r['Item Name'],Quantity:Math.abs(delta),'Signed Quantity':delta,'Balance After':r['On Hand'],Reference:ref||'',User:a.email,Notes:notes||''});
+}
+function stockFor_(db,n) {
+  const id=String(n['Nurse ID']),existing=db.rows('Nurse Stock').filter(r=>String(r['Nurse ID'])===id);
+  const kit=db.rows('Nurse Standard Kit').filter(r=>r['Kit Type']===n['Kit Type']&&!['no','false','inactive','0'].includes(String(r.Active).toLowerCase()));
+  const all=existing.slice();
+  kit.forEach(k=>{
+    if(!all.some(r=>r.SKU===k.SKU)) {
+      require_(!db.rows('Daily Nurse Inventory').some(r=>String(r['Nurse ID'])===id&&r.SKU===k.SKU),'Missing current nurse balance for '+k.SKU+'. Reconcile this legacy balance in Nurse Stock before continuing.');
+      require_(!db.rows('Nurse Stock History').some(r=>String(r['Nurse ID'])===id&&r.SKU===k.SKU)&&!db.rows('Stock Transactions').some(r=>String(r.Reference)===id&&r.SKU===k.SKU),'Missing nurse balance with existing movements for '+k.SKU+'. Reconcile Nurse Stock before continuing.');
+      all.push(db.add('Nurse Stock',{'Hub ID':n['Hub ID'],'Nurse ID':n['Nurse ID'],'Nurse Name':n['Nurse Name'],SKU:k.SKU,'Item Name':k['Item Name'],'On Hand':0,'Standard Qty':Number(k['Standard Qty']||0),'Last Updated':stamp_()}));
+    }
+  });
+  all.forEach(r=>{require_(String(r['Hub ID'])===String(n['Hub ID']),'Nurse stock belongs to another hub. Reconcile before continuing.');qty_(r['On Hand'],r.SKU+' nurse balance');});
+  return all;
+}
+function dailyFor_(db,n) {return db.rows('Daily Nurse Inventory').filter(r=>String(r['Nurse ID'])===String(n['Nurse ID']));}
+function history_(db,n,date,type,s,qty,balance,notes) {db.add('Nurse Stock History',{'Event ID':Utilities.getUuid(),Timestamp:stamp_(),Date:date,'Hub ID':n['Hub ID'],'Nurse ID':n['Nurse ID'],'Nurse Name':n['Nurse Name'],'Event Type':type,SKU:s.SKU,'Item Name':s['Item Name'],Qty:qty,'Nurse Balance':balance,Notes:notes||''});}
+function lines_(rows,field) {
+  require_(Array.isArray(rows)&&rows.length>0&&rows.length<=500,'Enter at least one inventory line.');const seen=new Set();
+  return rows.map(r=>{const sku=String(r.SKU||'');require_(sku&&!seen.has(sku),'Duplicate or missing SKU in this save.');seen.add(sku);return {SKU:sku,qty:qty_(r[field],sku)};});
+}
+function receive_(db,a,p) {
+  hub_(db,a,p.hubId);item_(db,p.sku);const qty=qty_(p.qty,'Receipt quantity',true);
+  moveHub_(db,a,p.hubId,p.sku,qty,'RECEIPT',text_(p.reference,'Reference'), 'Stock received');
+  return {hubId:p.hubId,message:qty+' units received.'};
+}
+function issue_(db,a,p) {
+  const n=nurse_(db,a,p.nurseId);require_(p.date===today_(),'Morning issues can only be recorded for today.');
+  const daily=dailyFor_(db,n);require_(!daily.some(d=>day_(d.Date)<p.date&&d.Status!=='Closed'),'Close this nurse’s overdue day before issuing new stock.');
+  require_(!daily.some(d=>day_(d.Date)>p.date),'Future inventory exists for this nurse. Ask an administrator to reconcile it before issuing.');
+  require_(!daily.some(d=>day_(d.Date)===p.date&&d.Status==='Closed'),'This nurse day is already closed. New issues start tomorrow.');
+  const stock=stockFor_(db,n),lines=lines_(p.rows,'Issue').filter(r=>r.qty>0);require_(lines.length,'Enter at least one positive issue quantity.');
+  lines.forEach(r=>{
+    item_(db,r.SKU);const s=stock.find(s=>String(s.SKU)===r.SKU);require_(s,'SKU is not assigned to this nurse: '+r.SKU);
+    const before=Number(s['On Hand']);moveHub_(db,a,n['Hub ID'],r.SKU,-r.qty,'ISSUE_TO_NURSE',n['Nurse ID'],'Morning issue');
+    let d=daily.find(d=>day_(d.Date)===p.date&&String(d.SKU)===r.SKU);
+    if(!d) {d=db.add('Daily Nurse Inventory',{Date:p.date,'Hub ID':n['Hub ID'],'Nurse ID':n['Nurse ID'],'Nurse Name':n['Nurse Name'],SKU:s.SKU,'Item Name':s['Item Name'],Opening:before,Issued:0,Closing:'',Consumed:'',Variance:0,Status:'Open'});daily.push(d);}
+    require_(qty_(d.Opening,'Opening')+qty_(d.Issued||0,'Issued')===before,'Nurse balance and daily inventory disagree. Reconcile before issuing.');
+    d.Issued=qty_(Number(d.Issued||0)+r.qty,'Total issued');s['On Hand']=qty_(before+r.qty,'Nurse balance');s['Last Updated']=stamp_();history_(db,n,p.date,'Received from Hub',s,r.qty,s['On Hand'],'Morning issue');
+  });return {hubId:n['Hub ID'],message:'Morning stock issued.'};
+}
+function close_(db,a,p) {
+  const n=nurse_(db,a,p.nurseId),daily=dailyFor_(db,n),date=String(p.date||'');
+  require_(/^\d{4}-\d{2}-\d{2}$/.test(date)&&date<=today_(),'Choose today or an overdue open day.');
+  require_(date===today_()||daily.some(d=>day_(d.Date)===date&&d.Status!=='Closed'),'Only an existing open day can be closed in the past.');
+  require_(!daily.some(d=>day_(d.Date)<date&&d.Status!=='Closed'),'Close the oldest open day first.');
+  require_(!daily.some(d=>day_(d.Date)>date),'Later inventory exists. Historical balances need administrator reconciliation.');
+  require_(!daily.some(d=>day_(d.Date)===date&&d.Status==='Closed'),'This day is already closed. It cannot be submitted twice.');
+  const stock=stockFor_(db,n),lines=lines_(p.rows,'Closing');
+  require_(stock.length===lines.length&&stock.every(s=>lines.some(l=>l.SKU===String(s.SKU))),'Submit every nurse inventory line when closing.');
+  lines.forEach(r=>{
+    const s=stock.find(s=>String(s.SKU)===r.SKU);let d=daily.find(d=>day_(d.Date)===date&&String(d.SKU)===r.SKU);
+    const opening=d?qty_(d.Opening,'Opening'):Number(s['On Hand']),issued=d?qty_(d.Issued||0,'Issued'):0,available=opening+issued;
+    require_(available===Number(s['On Hand']),'Current stock and daily balance disagree for '+r.SKU+'. Reconcile before closing.');
+    require_(r.qty<=available,r.SKU+': closing cannot exceed '+available+'.');
+    if(!d) d=db.add('Daily Nurse Inventory',{Date:date,'Hub ID':n['Hub ID'],'Nurse ID':n['Nurse ID'],'Nurse Name':n['Nurse Name'],SKU:s.SKU,'Item Name':s['Item Name'],Opening:opening,Issued:issued});
+    Object.assign(d,{Closing:r.qty,Consumed:available-r.qty,Variance:0,Status:'Closed'});
+    s['On Hand']=r.qty;s['Last Updated']=stamp_();
+    if(available-r.qty) history_(db,n,date,'Consumed',s,r.qty-available,r.qty,'Day closing');
+  });return {hubId:n['Hub ID'],message:'Day closing saved.'};
+}
+function return_(db,a,p) {
+  const n=nurse_(db,a,p.nurseId),reason=text_(p.reason,'Return reason',true);
+  require_(!dailyFor_(db,n).some(d=>day_(d.Date)>today_()),'Future inventory exists. Reconcile it before returning stock.');
+  require_(!dailyFor_(db,n).some(d=>d.Status!=='Closed'),'Close all open days before returning stock.');
+  const stock=stockFor_(db,n),lines=lines_(p.rows,'Return').filter(r=>r.qty>0);require_(lines.length,'Enter stock to return.');
+  lines.forEach(r=>{const s=stock.find(s=>String(s.SKU)===r.SKU);require_(s&&r.qty<=Number(s['On Hand']),r.SKU+': return exceeds nurse stock.');
+    moveHub_(db,a,n['Hub ID'],r.SKU,r.qty,'RETURN_FROM_NURSE',n['Nurse ID'],reason);s['On Hand']=Number(s['On Hand'])-r.qty;s['Last Updated']=stamp_();history_(db,n,today_(),'Return to Hub',s,-r.qty,s['On Hand'],reason);
+  });return {hubId:n['Hub ID'],message:'Returned stock added back to hub.'};
+}
+function addNurse_(db,a,p) {
+  hub_(db,a,p.hubId);const name=text_(p.name,'Nurse name',true),kit=text_(p.kit,'Kit type',true),phone=text_(p.phone,'Phone');
+  require_(db.rows('Nurse Standard Kit').some(k=>k['Kit Type']===kit&&!['no','false','inactive','0'].includes(String(k.Active).toLowerCase())),'Choose an active kit type.');
+  require_(!phone||!db.rows('Nurses').some(n=>n.Status==='Active'&&String(n.Phone).replace(/\D/g,'')===phone.replace(/\D/g,'')),'An active nurse already uses that phone number.');
+  const id='NUR-'+Utilities.getUuid().slice(0,8).toUpperCase();
+  const n=db.add('Nurses',{'Nurse ID':id,'Nurse Name':name,'Hub ID':p.hubId,Phone:phone,'Kit Type':kit,Status:'Active',Area:text_(p.area,'Area')});
+  stockFor_(db,n);return {id,hubId:p.hubId,message:'Nurse added with an empty kit balance.'};
+}
+function offboard_(db,a,p) {
+  const n=nurse_(db,a,p.nurseId),reason=text_(p.reason,'Offboarding reason',true);
+  require_(!dailyFor_(db,n).some(d=>day_(d.Date)>today_()),'Future inventory exists. Reconcile it before offboarding.');
+  require_(!dailyFor_(db,n).some(d=>d.Status!=='Closed'),'Close all open inventory days before offboarding.');
+  require_(!stockFor_(db,n).some(s=>Number(s['On Hand'])!==0),'Return all remaining stock to the hub before offboarding.');
+  n.Status='Inactive';return {id:n['Nurse ID'],hubId:n['Hub ID'],message:'Nurse offboarded. '+reason};
+}
+function managerValues_(db,a,p) {
+  admin_(a);const name=text_(p.name,'Manager name',true),email=text_(p.email,'Google email',true).toLowerCase();
+  require_(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),'Enter a valid Google email.');
+  require_(Array.isArray(p.hubIds)&&p.hubIds.length,'Assign at least one hub.');
+  const ids=[...new Set(p.hubIds.map(String))];ids.forEach(id=>hub_(db,a,id));
+  const def=String(p.defaultHubId||ids[0]);require_(ids.includes(def),'Default hub must be one of the assigned hubs.');
+  return {'Manager Name':name,Email:email,'Hub IDs':ids.join(','),'Default Hub ID':def,Status:p.status==='Inactive'?'Inactive':'Active'};
+}
+function addManager_(db,a,p) {
+  const values=managerValues_(db,a,p);require_(!db.rows('Managers').some(m=>String(m.Email).toLowerCase()===values.Email),'This email already exists. Edit its manager access instead.');
+  const id='MGR-'+Utilities.getUuid().slice(0,8).toUpperCase();db.add('Managers',{'Manager ID':id,...values,'Created At':stamp_()});
+  return {id,hubId:values['Default Hub ID'],message:'Manager access added for '+values.Email+'.'};
+}
+function updateManager_(db,a,p) {
+  admin_(a);const m=db.rows('Managers').find(m=>m['Manager ID']===p.managerId);require_(m,'Manager not found.');
+  const values=managerValues_(db,a,p);require_(!db.rows('Managers').some(x=>x!==m&&String(x.Email).toLowerCase()===values.Email),'Another manager uses this email.');
+  Object.assign(m,values);return {id:m['Manager ID'],hubId:values['Default Hub ID'],message:'Manager access updated: '+values.Email+' / '+values.Status+'.'};
+}
+function addHub_(db,a,p) {
+  admin_(a);const name=text_(p.name,'Hub name',true),city=text_(p.city,'City',true);
+  require_(!db.rows('Hubs').some(h=>h.Status==='Active'&&String(h['Hub Name']).toLowerCase()===name.toLowerCase()),'An active hub already has this name.');
+  const id='HUB-'+Utilities.getUuid().slice(0,8).toUpperCase();db.add('Hubs',{'Hub ID':id,'Hub Name':name,City:city,Manager:'',Status:'Active','Created At':today_()});
+  db.rows('Items').filter(i=>i.Status==='Active').forEach(i=>db.add('Hub Stock',{'Hub ID':id,SKU:i.SKU,'Item Name':i['Item Name'],'On Hand':0,Reserved:0,Available:0,'Last Updated':stamp_(),Status:'Low'}));
+  return {id,hubId:id,message:'Hub added. Assign manager access from Managers.'};
+}
+function archiveHub_(db,a,p) {
+  admin_(a);const h=hub_(db,a,p.hubId);
+  require_(!db.rows('Nurses').some(n=>n['Hub ID']===p.hubId&&n.Status==='Active'),'Offboard active nurses before archiving this hub.');
+  require_(!db.rows('Hub Stock').some(r=>r['Hub ID']===p.hubId&&(Number(r['On Hand'])!==0||Number(r.Reserved)!==0)),'Hub stock and reservations must be zero before archiving.');
+  require_(!db.rows('Nurse Stock').some(r=>r['Hub ID']===p.hubId&&Number(r['On Hand'])!==0),'Nurses still hold stock in this hub.');
+  require_(!db.rows('Managers').some(m=>m.Status==='Active'&&String(m['Hub IDs']).split(',').includes(p.hubId)),'Reassign manager access before archiving this hub.');
+  h.Status='Inactive';return {hubId:p.hubId,message:'Hub archived. History retained.'};
+}
+
+    window.previewRole='Admin';setup_();
+    function add(name,obj){const sh=tables[name];sh.values.push(sh.values[0].map(h=>obj[h]??''));}
+    const items=[['SYR-2ML','Syringe 2 ml',10,120,240],['SYR-3ML','Syringe 3 ml',10,100,190],['SYR-5ML','Syringe 5 ml',5,60,150],['GLV-M','Examination gloves M',20,150,84],['ALC-SWB','Alcohol swab',20,180,300],['IV-SET','IV infusion set',3,40,70],['CAN-20G','IV cannula 20G',4,40,30],['GAUZE-4','Sterile gauze 4 × 4',6,50,100],['TAPE-1','Micropore tape',2,20,55],['SAN-50','Hand sanitizer 50 ml',1,20,35],['MASK-3P','3-ply mask',10,100,180],['BP-MON','Digital BP monitor',1,3,9]];
+    const hubs=[['HUB-GGN-01','Gurugram Central','Gurugram'],['HUB-GGN-02','Gurugram West','Gurugram'],['HUB-BLR-01','Bengaluru Hub','Bengaluru']];
+    hubs.forEach(([id,name,city])=>add('Hubs',{'Hub ID':id,'Hub Name':name,City:city,Status:'Active','Created At':today_()}));
+    items.forEach(([sku,name,std,reorder,qty])=>{add('Items',{SKU:sku,'Item Name':name,Category:sku==='BP-MON'?'Reusable Asset':'Consumable',UOM:'Each','Reorder Level':reorder,Status:'Active'});add('Nurse Standard Kit',{'Kit Type':'Standard Nurse Bag',SKU:sku,'Item Name':name,'Standard Qty':std,Active:'Yes'});hubs.forEach(([id],j)=>add('Hub Stock',{'Hub ID':id,SKU:sku,'Item Name':name,'On Hand':qty+j*10,Reserved:0,Available:qty+j*10,'Last Updated':stamp_(),Status:qty+j*10<=reorder?'Low':'Healthy'}));});
+    ['Ananya Rao','Meera Kapoor','Kavya Nair','Riya Mehta','Nisha Shah','Tara Menon'].forEach((name,i)=>{const hub=hubs[Math.floor(i/2)][0],id='DEMO-N'+(i+1);add('Nurses',{'Nurse ID':id,'Nurse Name':name,'Hub ID':hub,'Kit Type':'Standard Nurse Bag',Status:'Active',Area:i%2?'North zone':'Central zone'});items.forEach(([sku,item,std],j)=>add('Nurse Stock',{'Nurse ID':id,'Nurse Name':name,'Hub ID':hub,SKU:sku,'Item Name':item,'On Hand':Math.max(0,std-(j%4===0?Math.min(4,std):0)),'Standard Qty':std,'Last Updated':stamp_()}));});
+    add('Managers',{'Manager ID':'DEMO-M1','Manager Name':'Priya · sample manager',Email:'manager@immidit.example','Default Hub ID':'HUB-GGN-01','Hub IDs':'HUB-GGN-01,HUB-GGN-02',Status:'Active','Created At':stamp_()});
+    add('Audit Log',{'Event ID':crypto.randomUUID(),Timestamp:stamp_(),User:'demo@immidit.example',Action:'sample data','Hub ID':'HUB-GGN-01',Details:'Interactive sample workspace. Changes reset when this page reloads.'});
+    return {getSnapshot,mutate,getNurseHistory};
+  })();
+  function runner(success,failure){return new Proxy({},{get(_,fn){if(fn==='withSuccessHandler')return cb=>runner(cb,failure);if(fn==='withFailureHandler')return cb=>runner(success,cb);return (...args)=>setTimeout(()=>{try{success(structuredClone(api[fn](...args)));}catch(e){failure(e);}},180);}});}
+  return runner(()=>{},()=>{});
+})()}};
+</script><script>'use strict';
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>Number(v||0);
+const fmt=v=>num(v).toLocaleString('en-IN');
+const day=v=>String(v||'').slice(0,10);
+const badge=s=>`<span class="status ${['Active','Ready','Healthy','Closed'].includes(s)?'active':s==='Inactive'?'inactive':'low'}">${esc(s)}</span>`;
+const empty=msg=>`<div class="empty">${esc(msg)}</div>`;
+const button=(label,action,id='',cls='secondary')=>`<button type="button" class="btn ${cls} small" data-action="${action}" data-id="${esc(id)}">${label}</button>`;
+const titles={dashboard:['Operations overview','A clear view of stock, people and today’s work.'],inventory:['Hub inventory','Available stock at your selected hub.'],issue:['Morning issue','Top up the bag with exactly what is needed.'],nurseStock:['Nurse stock & history','Every item with a nurse, and how it moved.'],closing:['Day closing','Count what remains. Consumption is calculated for you.'],team:['Nurses','Onboard, reconcile and offboard your hub’s team.'],managers:['Managers','Assign Google account access and a default working hub.'],hubs:['Hub network','The locations that keep your operations moving.'],activity:['Activity','Who changed what, and when.']};
+let DATA=null,HUB='',PAGE='dashboard',NURSE='',DATE='',DAYS=10,ROWS=[],dirty=false,busy=false,syncing=false,drawerOpen=false,pending=null,viewToken=0,historyCache=new Map(),lastFocus=null,filter='',teamStatus='Active',toastTimer;
+function gs(fn,...args){return new Promise((resolve,reject)=>google.script.run.withSuccessHandler(resolve).withFailureHandler(e=>reject(new Error(e.message||e)))[fn](...args));}
+function toast(msg,error=false){$('toast').textContent=msg;$('toast').style.background=error?'#842d2d':'#09222D';$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',6000);}
+function message(msg,error=false){$('message').innerHTML=msg?`<div class="banner ${error?'error':''}">${esc(msg)}</div>`:'';}
+function status(msg,warn=false){$('syncText').textContent=msg;$('syncDot').classList.toggle('warn',warn);}
+function keyPending(){return 'immidit-pending-'+DATA.actor.email;}
+function persistPending(){try{if(pending)sessionStorage.setItem(keyPending(),JSON.stringify(pending));else sessionStorage.removeItem(keyPending());}catch(e){/* Retry remains available in this tab if browser storage is disabled. */}}
+function pendingUI(){
+  if(pending&&drawerOpen)closeDrawer(true);
+  $('pendingBanner').innerHTML=pending?`<div class="banner">A save needs confirmation. Retry the same save to check whether it was recorded. ${button('Retry save','retry')}</div>`:'';
+  $('content').inert=!!pending;$('globalHub').disabled=!!pending||!DATA||!activeHubs().length;$('receiveButton').disabled=!!pending||!HUB;
+}
+function activeHubs(){return DATA.hubs.filter(h=>h.Status==='Active');}
+function inHub(r){return !HUB||String(r['Hub ID'])===HUB;}
+function nurses(all=false){return DATA.nurses.filter(inHub).filter(n=>all||n.Status==='Active');}
+function hubName(id){return DATA.hubs.find(h=>h['Hub ID']===id)?.['Hub Name']||id;}
+function nurseById(){return DATA.nurses.find(n=>n['Nurse ID']===NURSE);}
+function dailyFor(id){return DATA.daily.filter(d=>d['Nurse ID']===id);}
+function kitFor(n){return DATA.kits.filter(k=>k['Kit Type']===n['Kit Type']&&!['no','false','inactive','0'].includes(String(k.Active).toLowerCase()));}
+function stockFor(n){
+  const rows=DATA.nurseStock.filter(s=>s['Nurse ID']===n['Nurse ID']).map(s=>({...s}));
+  kitFor(n).forEach(k=>{if(!rows.some(s=>s.SKU===k.SKU)) rows.push({'Hub ID':n['Hub ID'],'Nurse ID':n['Nurse ID'],'Nurse Name':n['Nurse Name'],SKU:k.SKU,'Item Name':k['Item Name'],'On Hand':0,'Standard Qty':num(k['Standard Qty']),_missing:dailyFor(n['Nurse ID']).some(d=>d.SKU===k.SKU)});});
+  return rows;
+}
+function guardDiscard(){if(busy||pending){toast('Confirm the pending save before changing your workspace.',true);return false;}if(dirty&&!confirm('Discard unsaved quantities and continue?'))return false;dirty=false;if(DATA)status('Last synced '+DATA.syncedAt+' IST');return true;}
+function validateSnapshot(x){if(!x||!Array.isArray(x.hubs)||!Array.isArray(x.nurses)||!Array.isArray(x.daily)||!x.actor||!Number.isInteger(x.revision))throw new Error('The server returned incomplete data. Check the V3 deployment and try Sync.');}
+function applySnapshot(x,initial=false){
+  validateSnapshot(x);DATA=x;
+  const allowed=activeHubs();
+  if(initial) HUB=allowed.some(h=>h['Hub ID']===x.actor.defaultHubId)?x.actor.defaultHubId:allowed[0]?.['Hub ID']||'';
+  else if(HUB&&!allowed.some(h=>h['Hub ID']===HUB)) HUB=allowed[0]?.['Hub ID']||'';
+  $('globalHub').innerHTML=(x.actor.role==='Admin'?'<option value="">All active hubs</option>':'')+allowed.map(h=>`<option value="${esc(h['Hub ID'])}">${esc(h['Hub Name'])}</option>`).join('');
+  $('globalHub').value=HUB;$('globalHub').disabled=busy||!allowed.length;
+  $('receiveButton').disabled=busy||!HUB;
+  $('identity').textContent=x.actor.name+' · '+x.actor.role;
+  document.querySelectorAll('[data-admin]').forEach(e=>e.hidden=x.actor.role!=='Admin');
+  if(x.actor.role!=='Admin'&&PAGE==='managers') PAGE='dashboard';
+  if(!DATE) DATE=x.today;
+  historyCache.clear();status('Synced '+x.syncedAt+' IST');render();
+}
+async function sync(initial=false,automatic=false){
+  if(busy||syncing||(!initial&&(pending||drawerOpen)))return;
+  if(!initial&&dirty){if(automatic)return;if(!guardDiscard())return;}
+  syncing=true;$('syncButton').disabled=true;status('Syncing…');
+  try{const result=await gs('getSnapshot');
+    if(!initial&&(dirty||drawerOpen||busy||pending||result?.revision<DATA.revision)){status('Sync deferred · finish your current changes',true);return;}
+    applySnapshot(result,initial);message('');
+    if(initial){try{pending=JSON.parse(sessionStorage.getItem(keyPending())||'null');}catch(e){pending=null;}pendingUI();}
+  }catch(e){status('Sync unavailable · try again',true);message(e.message,true);if(initial)$('content').innerHTML=empty('Unable to open this workspace. Resolve the message above, then press Sync.');}
+  finally{syncing=false;$('syncButton').disabled=false;}
+}
+function render(){
+  if(!DATA)return;viewToken++;
+  const meta=titles[PAGE];$('pageTitle').textContent=meta[0];$('pageSubtitle').textContent=meta[1];
+  document.querySelectorAll('[data-page]').forEach(b=>{b.classList.toggle('active',b.dataset.page===PAGE);b.setAttribute('aria-current',b.dataset.page===PAGE?'page':'false');});
+  const views={dashboard:renderDashboard,inventory:renderInventory,issue:renderIssue,nurseStock:renderNurseStock,closing:renderClosing,team:renderTeam,managers:renderManagers,hubs:renderHubs,activity:renderActivity};
+  views[PAGE]();
+}
+function table(headers,rows){return `<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;}
+function itemCell(r){return `<strong>${esc(r['Item Name'])}</strong><br><span class="muted">${esc(r.SKU)}</span>`;}
+function hero(title,copy,action=''){return `<div class="hero"><div><h2>${title}</h2><p>${copy}</p></div>${action}</div>`;}
+function attention(){
+  const notes=[];const ns=nurses();
+  ns.forEach(n=>{
+    const ds=dailyFor(n['Nurse ID']),name=n['Nurse Name'];
+    if(ds.some(d=>day(d.Date)>DATA.today))notes.push(name+': future-dated inventory needs reconciliation.');
+    const overdue=[...new Set(ds.filter(d=>day(d.Date)<DATA.today&&d.Status!=='Closed').map(d=>day(d.Date)))].sort();
+    if(overdue.length)notes.push(name+': '+overdue.length+' overdue open day(s), starting '+overdue[0]+'.');
+    const stocks=stockFor(n);
+    if(stocks.some(s=>s._missing))notes.push(name+': missing current balances for existing inventory.');
+    if(stocks.some(s=>num(s['On Hand'])<0||s['Hub ID']!==n['Hub ID']))notes.push(name+': nurse balance or hub assignment needs reconciliation.');
+    const latest=ds.map(d=>day(d.Date)).sort().pop();
+    if(ds.some(d=>day(d.Date)===latest&&d.Status!=='Closed'&&stocks.some(s=>s.SKU===d.SKU&&num(s['On Hand'])!==num(d.Opening)+num(d.Issued))))notes.push(name+': open-day totals disagree with current stock.');
+  });
+  const seen=new Set();DATA.daily.filter(inHub).forEach(d=>{const k=[day(d.Date),d['Nurse ID'],d.SKU].join('/');if(seen.has(k))notes.push('Duplicate daily record: '+k);seen.add(k);});
+  return notes;
+}
+function renderDashboard(){
+  const ns=nurses(),stock=DATA.stock.filter(inHub).filter(s=>activeHubs().some(h=>h['Hub ID']===s['Hub ID'])),todayRows=DATA.daily.filter(inHub).filter(d=>day(d.Date)===DATA.today);
+  const low=stock.filter(s=>s.Status==='Low'),closed=new Set(todayRows.filter(d=>d.Status==='Closed').map(d=>d['Nurse ID'])),notes=attention();
+  const metrics=[['ACTIVE NURSES',ns.length,'At '+(HUB?hubName(HUB):'all active hubs')],['AWAITING CLOSING',ns.filter(n=>!closed.has(n['Nurse ID'])).length,'Today · '+DATA.today],['LOW STOCK LINES',low.length,'Check replenishment below'],['CONSUMED TODAY',todayRows.reduce((s,d)=>s+num(d.Consumed),0),'Units recorded at day closing']];
+  $('content').innerHTML=`${hero('Ready for the next visit','Issue in the morning. Count in the evening. Keep every bag accounted for.',button('Start morning issue','goIssue','','primary'))}<div class="metrics">${metrics.map(([l,v,s])=>`<div class="metric"><label>${l}</label><b>${fmt(v)}</b><small>${esc(s)}</small></div>`).join('')}</div>
+  ${notes.length?`<div class="banner"><strong>Reconciliation needed</strong><ul>${notes.slice(0,12).map(n=>`<li>${esc(n)}</li>`).join('')}</ul>${notes.length>12?`<p>${notes.length-12} more items require review in the backend.</p>`:''}</div>`:''}
+  <div class="grid"><div class="card"><div class="card-head"><h3>Today’s closing checklist</h3><span>${closed.size} recorded</span></div>${ns.length?table(['Nurse','Hub','Today',''],ns.map(n=>`<tr><td>${esc(n['Nurse Name'])}</td><td>${esc(hubName(n['Hub ID']))}</td><td>${badge(closed.has(n['Nurse ID'])?'Closed':'Pending')}</td><td>${button(closed.has(n['Nurse ID'])?'View':'Close day','closeFor',n['Nurse ID'])}</td></tr>`)):empty('Add a nurse to start daily operations.')}</div>
+  <div class="card"><div class="card-head"><h3>Stock needing attention</h3><span>${low.length} lines</span></div>${low.length?table(['Item','Hub','Available'],low.slice(0,8).map(s=>`<tr><td>${itemCell(s)}</td><td>${esc(hubName(s['Hub ID']))}</td><td class="negative">${fmt(s.Available)}</td></tr>`)):empty('All stocked lines are above their reorder level.')}</div></div>
+  <div class="section-title"><h2>Next morning’s replenishment</h2><span class="muted">Based on current nurse balances and standard kits</span></div><div class="card">${replenishment(ns)}</div>`;
+}
+function replenishment(ns){
+  const totals=new Map();ns.forEach(n=>stockFor(n).forEach(s=>{const std=num(kitFor(n).find(k=>k.SKU===s.SKU)?.['Standard Qty']??s['Standard Qty']);const k=n['Hub ID']+'/'+s.SKU;const r=totals.get(k)||{...s,need:0};r.need+=Math.max(0,std-num(s['On Hand']));totals.set(k,r);}));
+  const rows=[...totals.values()].filter(r=>r.need>0);
+  return rows.length?table(['Item','Hub','Kit top-ups needed','Hub available','Shortfall'],rows.map(r=>{const available=num(DATA.stock.find(s=>s['Hub ID']===r['Hub ID']&&s.SKU===r.SKU)?.Available);return `<tr><td>${itemCell(r)}</td><td>${esc(hubName(r['Hub ID']))}</td><td>${fmt(r.need)}</td><td>${fmt(available)}</td><td class="${r.need>available?'negative':''}">${fmt(Math.max(0,r.need-available))}</td></tr>`;})):empty('No kit top-ups needed at the current balances.');
+}
+function renderInventory(){
+  $('content').innerHTML=`<div class="toolbar"><input id="search" class="field search" placeholder="Search item or SKU" aria-label="Search inventory" value="${esc(filter)}"><select id="stockStatus" class="field" aria-label="Stock status"><option value="">All stock</option><option>Low</option><option>Healthy</option></select>${button('Export CSV','exportInventory')}</div><div id="inventoryRows" class="card"></div>`;renderInventoryRows();
+}
+function inventoryRows(){return DATA.stock.filter(inHub).filter(r=>activeHubs().some(h=>h['Hub ID']===r['Hub ID'])).filter(r=>(!filter||(r.SKU+' '+r['Item Name']).toLowerCase().includes(filter.toLowerCase()))&&(!$('stockStatus')?.value||r.Status===$('stockStatus').value));}
+function renderInventoryRows(){const rows=inventoryRows();$('inventoryRows').innerHTML=rows.length?table(['Item','Hub','On hand','Reserved','Available','Status','Updated'],rows.map(r=>`<tr><td>${itemCell(r)}</td><td>${esc(hubName(r['Hub ID']))}</td><td>${fmt(r['On Hand'])}</td><td>${fmt(r.Reserved)}</td><td class="number">${fmt(r.Available)}</td><td>${badge(r.Status)}</td><td>${esc(r['Last Updated'])}</td></tr>`)):empty('No matching inventory in this hub.');}
+function selectNurse(all=false){const ns=nurses(all);if(!ns.some(n=>n['Nurse ID']===NURSE))NURSE=ns[0]?.['Nurse ID']||'';return ns;}
+function nurseToolbar(ns,date=false){return `<div class="toolbar"><label>Nurse<select id="nurseSelect" class="field">${ns.map(n=>`<option value="${esc(n['Nurse ID'])}" ${n['Nurse ID']===NURSE?'selected':''}>${esc(n['Nurse Name'])}${n.Status!=='Active'?' (offboarded)':''}</option>`).join('')}</select></label>${date?`<label>Date<input class="field" id="workDate" type="date" max="${DATA.today}" value="${esc(DATE)}" ${PAGE==='issue'?'disabled':''}></label>`:''}<span class="hint">${NURSE?esc(hubName(nurseById()['Hub ID'])):''}</span></div>`;}
+function issueRows(n){const ds=dailyFor(n['Nurse ID']).filter(d=>day(d.Date)===DATE);return stockFor(n).map(s=>{const std=num(kitFor(n).find(k=>k.SKU===s.SKU)?.['Standard Qty']??s['Standard Qty']),available=num(DATA.stock.find(h=>h['Hub ID']===n['Hub ID']&&h.SKU===s.SKU)?.Available),suggested=Math.max(0,std-num(s['On Hand'])),active=DATA.items.some(i=>i.SKU===s.SKU&&i.Status==='Active');return {...s,Current:num(s['On Hand']),Standard:std,Available:available,Issued:num(ds.find(d=>d.SKU===s.SKU)?.Issued),Suggested:active?suggested:0,Issue:active?Math.min(suggested,Math.max(0,available)):0,active};});}
+function renderIssue(){
+  const ns=selectNurse();DATE=DATA.today;
+  if(!NURSE){$('content').innerHTML=empty('No active nurses in this hub. Add one in Nurses.');return;}
+  const n=nurseById(),ds=dailyFor(NURSE),blocked=ds.some(d=>day(d.Date)>DATE||day(d.Date)<DATE&&d.Status!=='Closed'||day(d.Date)===DATE&&d.Status==='Closed');ROWS=issueRows(n);
+  $('content').innerHTML=hero('Top up, then go','Suggested quantities are capped at available hub stock. You can change each quantity.')+nurseToolbar(ns,true)+(blocked?'<div class="banner">This nurse has a closed day, an overdue open day or future-dated inventory. Resolve it before issuing.</div>':'')+`<div class="card">${table(['Item','With nurse','Standard','Hub available','Issued today','Top-up gap','Issue now'],ROWS.map((r,i)=>`<tr><td>${itemCell(r)}${!r.active?'<br><span class="muted">Inactive item</span>':''}</td><td>${r.Current}</td><td>${r.Standard}</td><td>${r.Available}</td><td>${r.Issued}</td><td>${r.Suggested}</td><td><input aria-label="Issue ${esc(r['Item Name'])}" class="qty" type="number" min="0" max="${r.Available}" step="1" value="${r.Issue}" data-row="${i}" data-field="Issue" ${blocked||!r.active?'disabled':''}></td></tr>`))}<div class="table-footer"><span class="muted" id="quantitySummary">${fmt(ROWS.reduce((s,r)=>s+r.Issue,0))} units to issue</span><div class="actions">${button('Fill suggested','suggest')}${blocked?'':button('Issue selected stock','saveIssue','','primary')}</div></div></div>`;
+}
+function renderClosing(){
+  const ns=selectNurse();if(!NURSE){$('content').innerHTML=empty('No active nurses in this hub.');return;}
+  const n=nurseById(),ds=dailyFor(NURSE),todays=ds.filter(d=>day(d.Date)===DATE),closed=todays.some(d=>d.Status==='Closed');
+  ROWS=stockFor(n).map(s=>{const d=todays.find(d=>d.SKU===s.SKU),opening=d?num(d.Opening):num(s['On Hand']),issued=num(d?.Issued),available=opening+issued;return {...s,Opening:opening,Issued:issued,Available:available,Closing:d?.Status==='Closed'?num(d.Closing):available};});
+  const overdue=[...new Set(ds.filter(d=>d.Status!=='Closed'&&day(d.Date)<DATA.today).map(d=>day(d.Date)))].sort();
+  const blocked=closed||ds.some(d=>day(d.Date)>DATE||day(d.Date)<DATE&&d.Status!=='Closed')||(DATE!==DATA.today&&!todays.length);
+  $('content').innerHTML=hero('Change only what was used','Closing defaults to available stock. Enter the actual quantity remaining in the nurse’s bag.')+nurseToolbar(ns,true)+(overdue.length?`<div class="banner">Overdue inventory from ${esc(overdue[0])}. ${button('Open oldest day','oldest',overdue[0])}</div>`:'')+(blocked?`<div class="banner">${closed?'This day is closed and is read-only.':'Close the oldest open day first. Historical days with later entries require administrator reconciliation.'}</div>`:'')+`<div class="card">${table(['Item','Opening','Issued today','Available','Closing','Consumed'],ROWS.map((r,i)=>`<tr><td>${itemCell(r)}</td><td>${r.Opening}</td><td class="readonly">${r.Issued}</td><td class="number">${r.Available}</td><td><input class="qty" aria-label="Closing ${esc(r['Item Name'])}" type="number" min="0" max="${r.Available}" step="1" value="${r.Closing}" data-row="${i}" data-field="Closing" ${blocked?'disabled':''}></td><td id="cons${i}">${r.Available-r.Closing}</td></tr>`))}<div class="table-footer"><span class="muted">Hub stock stays unchanged at day closing.</span>${blocked?'':button('Save day closing','saveClose','','primary')}</div></div>`;
+}
+function renderNurseStock(){
+  const ns=selectNurse(true);if(!NURSE){$('content').innerHTML=empty('No nurses assigned to this hub.');return;}
+  const n=nurseById(),rows=stockFor(n);
+  $('content').innerHTML=nurseToolbar(ns)+`<div class="toolbar"><input id="search" class="field search" placeholder="Search item or SKU" aria-label="Search nurse stock" value="${esc(filter)}">${n.Status==='Active'?button('Return stock to hub','return',NURSE):badge('Inactive')}</div><div id="nurseRows" class="card"></div><div class="section-title"><h2>Movement history</h2><select id="historyDays" class="field" aria-label="History period">${[10,20,30].map(d=>`<option value="${d}" ${d===DAYS?'selected':''}>Last ${d} days</option>`).join('')}</select></div><div id="history" class="card"><div class="loading-block">Loading movements…</div></div>`;
+  renderNurseRows();loadHistory();
+}
+function renderNurseRows(){const n=nurseById(),rows=stockFor(n).filter(s=>!filter||(s.SKU+' '+s['Item Name']).toLowerCase().includes(filter.toLowerCase()));$('nurseRows').innerHTML=table(['Item','With nurse','Standard','Top-up gap','Status'],rows.map(s=>{const std=num(kitFor(n).find(k=>k.SKU===s.SKU)?.['Standard Qty']??s['Standard Qty']),gap=Math.max(0,std-num(s['On Hand']));return `<tr><td>${itemCell(s)}</td><td class="number">${s._missing?'Needs reconciliation':fmt(s['On Hand'])}</td><td>${std}</td><td>${gap}</td><td>${badge(gap?'Below standard':'Ready')}</td></tr>`;}));}
+async function loadHistory(){const token=++viewToken,id=NURSE,span=DAYS,key=id+'/'+span+'/'+DATA.revision;try{const rows=historyCache.get(key)||await gs('getNurseHistory',id,span);if(token!==viewToken||PAGE!=='nurseStock'||NURSE!==id)return;if(!Array.isArray(rows))throw new Error('History response unavailable.');historyCache.set(key,rows);$('history').innerHTML=rows.length?table(['Date','Movement','Item','Quantity','Balance after','Notes'],rows.map(r=>`<tr><td>${esc(day(r.Date))}</td><td>${esc(r['Event Type'])}</td><td>${itemCell(r)}</td><td class="${num(r.Qty)<0?'negative':'positive'}">${num(r.Qty)>0?'+':''}${fmt(r.Qty)}</td><td>${r['Nurse Balance']===''||r['Nurse Balance']==null?'—':fmt(r['Nurse Balance'])}</td><td>${esc(r.Notes)}</td></tr>`)):empty('No movements in this period.');}catch(e){if(token===viewToken&&$('history'))$('history').innerHTML=empty(e.message);}}
+function renderTeam(){
+  $('content').innerHTML=hero('Your nursing team','New nurses start with zero stock. Offboarding keeps their full inventory history.',button('+ Add nurse','addNurse','','primary'))+`<div class="toolbar"><input id="search" class="field search" aria-label="Search nurses" placeholder="Search nurse, phone or area" value="${esc(filter)}"><select id="teamStatus" class="field" aria-label="Nurse status"><option value="Active" ${teamStatus==='Active'?'selected':''}>Active nurses</option><option value="Inactive" ${teamStatus==='Inactive'?'selected':''}>Offboarded nurses</option><option value="" ${!teamStatus?'selected':''}>All nurses</option></select></div><div id="teamRows" class="card"></div>`;renderTeamRows();
+}
+function renderTeamRows(){const ns=nurses(true).filter(n=>(!teamStatus||n.Status===teamStatus)&&(!filter||[n['Nurse Name'],n.Phone,n.Area].join(' ').toLowerCase().includes(filter.toLowerCase())));$('teamRows').innerHTML=ns.length?table(['Nurse','Hub','Kit / area','Stock held','Status',''],ns.map(n=>{const held=stockFor(n).reduce((s,r)=>s+num(r['On Hand']),0);return `<tr><td><strong>${esc(n['Nurse Name'])}</strong><br><span class="muted">${esc(n.Phone||n['Nurse ID'])}</span></td><td>${esc(hubName(n['Hub ID']))}</td><td>${esc(n['Kit Type'])}<br><span class="muted">${esc(n.Area)}</span></td><td>${fmt(held)}</td><td>${badge(n.Status)}</td><td><div class="actions">${button('Stock','stockFor',n['Nurse ID'])}${n.Status==='Active'?button('Offboard','offboard',n['Nurse ID'],'danger'):''}</div></td></tr>`;})):empty('No nurses match this selection.');}
+function renderManagers(){if(DATA.actor.role!=='Admin'){PAGE='dashboard';render();return;}$('content').innerHTML=hero('Hub access, made explicit','Managers open in their default hub and can switch only between assigned hubs.',button('+ Add manager','addManager','','primary'))+`<div class="card">${DATA.managers.length?table(['Manager','Google account','Assigned hubs','Default hub','Status',''],DATA.managers.map(m=>`<tr><td>${esc(m['Manager Name'])}</td><td>${esc(m.Email)}</td><td>${String(m['Hub IDs']).split(',').map(h=>esc(hubName(h))).join('<br>')}</td><td>${esc(hubName(m['Default Hub ID']))}</td><td>${badge(m.Status)}</td><td>${button('Edit access','editManager',m['Manager ID'])}</td></tr>`)):empty('Add a manager using their work Google email. Access is available when they next open the app.')}</div><p class="muted">Administrators are configured separately by the app owner. Inactivating a manager removes app access.</p>`;}
+function renderHubs(){$('content').innerHTML=hero('Your operating network','Archive a hub only after stock, nurse assignments and manager access are cleared.',DATA.actor.role==='Admin'?button('+ Add hub','addHub','','primary'):'')+`<div class="hub-cards">${DATA.hubs.map(h=>`<div class="hub-card"><h3>${esc(h['Hub Name'])}</h3><div class="meta">${esc(h.City)}<br>${esc(h['Hub ID'])}<br>${DATA.nurses.filter(n=>n['Hub ID']===h['Hub ID']&&n.Status==='Active').length} active nurses</div><div class="actions">${badge(h.Status)}${h.Status==='Active'?button('Open hub','openHub',h['Hub ID']):''}${DATA.actor.role==='Admin'&&h.Status==='Active'?button('Archive','archiveHub',h['Hub ID'],'danger'):''}</div></div>`).join('')}</div>`;}
+function renderActivity(){const rows=DATA.audit.filter(r=>!r['Hub ID']||inHub(r));$('content').innerHTML=hero('A shared record of changes','Recent successful V3 operations, recorded with the signed-in Google account.')+`<div class="card">${rows.length?table(['When','By','Operation','Hub','Details'],rows.map(r=>`<tr><td>${esc(r.Timestamp)}</td><td>${esc(r.User)}</td><td>${esc(r.Action)}</td><td>${esc(hubName(r['Hub ID']))}</td><td>${esc(r.Details)}</td></tr>`)):empty('V3 activity will appear here after your first save.')}</div>`;}
+function hubOptions(selected=HUB){return activeHubs().map(h=>`<option value="${esc(h['Hub ID'])}" ${h['Hub ID']===selected?'selected':''}>${esc(h['Hub Name'])}</option>`).join('');}
+function openDrawer(title,lead,body,action,label='Save'){
+  if(busy||pending)return toast('Confirm the pending save first.',true);lastFocus=document.activeElement;drawerOpen=true;
+  $('drawer').innerHTML=`<button class="close" data-action="closeDrawer" aria-label="Close dialog">×</button><h2 id="drawerTitle">${title}</h2><p class="lead">${lead}</p><form id="drawerForm" data-submit="${action}"><div class="form">${body}</div><div class="savebar">${button('Cancel','closeDrawer')}<button class="btn primary" type="submit">${label}</button></div></form>`;
+  $('shade').classList.add('show');$('drawer').classList.add('open');$('drawer').focus();
+}
+function closeDrawer(force=false){if(!force&&!guardDiscard())return;drawerOpen=false;$('shade').classList.remove('show');$('drawer').classList.remove('open');$('drawer').innerHTML='';lastFocus?.focus();}
+function openNurse(){if(!activeHubs().length)return toast('Add an active hub first.',true);const kits=[...new Set(DATA.kits.filter(k=>!['no','false','inactive','0'].includes(String(k.Active).toLowerCase())).map(k=>k['Kit Type']))];openDrawer('Add a nurse','Assign a hub and standard kit. Issue stock from Morning issue after onboarding.',`<label>Nurse name<input id="fName" required maxlength="250" autocomplete="off"></label><label>Hub<select id="fHub">${hubOptions()}</select></label><label>Phone<input id="fPhone" type="tel" maxlength="30"></label><label>Kit type<select id="fKit" required>${kits.map(k=>`<option>${esc(k)}</option>`).join('')}</select></label><label>Area<input id="fArea" maxlength="250"></label>`,'submitNurse','Add nurse');}
+function openManager(id){
+  const m=DATA.managers.find(m=>m['Manager ID']===id),selected=m?String(m['Hub IDs']).split(','):[HUB||activeHubs()[0]?.['Hub ID']].filter(Boolean);
+  openDrawer(m?'Edit manager access':'Add a manager','Use the Google email they will sign in with. Their default hub is selected automatically.',`<input type="hidden" id="fId" value="${esc(id||'')}"><label>Manager name<input id="fName" value="${esc(m?.['Manager Name'])}" required maxlength="250"></label><label>Google email<input id="fEmail" type="email" value="${esc(m?.Email)}" required maxlength="250"></label><label>Assigned hubs</label><div class="hub-checks">${activeHubs().map(h=>`<label class="check"><input type="checkbox" name="hubAccess" value="${esc(h['Hub ID'])}" ${selected.includes(h['Hub ID'])?'checked':''}>${esc(h['Hub Name'])}</label>`).join('')}</div><label>Default hub<select id="fDefault">${hubOptions(m?.['Default Hub ID']||selected[0])}</select></label><label>Status<select id="fStatus"><option>Active</option><option ${m?.Status==='Inactive'?'selected':''}>Inactive</option></select></label>`,'submitManager',m?'Save access':'Add manager');
+}
+function openReturn(id){NURSE=id;const n=nurseById();if(!n)return;const open=dailyFor(id).some(d=>d.Status!=='Closed');if(open)return toast('Close all open days before returning stock.',true);ROWS=stockFor(n).filter(s=>num(s['On Hand'])>0).map(s=>({...s,Return:num(s['On Hand'])}));if(!ROWS.length)return toast('This nurse has no stock to return.');openDrawer('Return stock to hub',esc(n['Nurse Name'])+' · '+esc(hubName(n['Hub ID']))+'. Count returned items before saving.',`<label>Reason<input id="fReason" required maxlength="250" placeholder="e.g. Offboarding kit return"></label><div class="card">${table(['Item','With nurse','Return'],ROWS.map((r,i)=>`<tr><td>${itemCell(r)}</td><td>${fmt(r['On Hand'])}</td><td><input class="qty" aria-label="Return ${esc(r['Item Name'])}" type="number" min="0" max="${r['On Hand']}" step="1" required value="${r.Return}" data-row="${i}" data-field="Return"></td></tr>`))}</div>`,'submitReturn','Return stock');}
+function openOffboard(id){const n=DATA.nurses.find(n=>n['Nurse ID']===id);const stock=stockFor(n),held=stock.reduce((s,r)=>s+num(r['On Hand']),0),open=dailyFor(id).some(d=>d.Status!=='Closed');if(held||open){message(n['Nurse Name']+': '+(open?'close all open inventory days, then ':'')+(held?'return '+held+' remaining units to the hub, then ':'')+'offboard.');NURSE=id;PAGE=open?'closing':'nurseStock';DATE=DATA.today;render();return;}openDrawer('Offboard '+esc(n['Nurse Name']),'Their status becomes inactive. All stock and movement history stays available.',`<input type="hidden" id="fId" value="${esc(id)}"><label>Reason<input id="fReason" required maxlength="250" placeholder="Reason for offboarding"></label>`,'submitOffboard','Offboard nurse');}
+function setBusy(value){busy=value;document.querySelectorAll('button,input,select').forEach(el=>{if(value){el.dataset.wasDisabled=String(el.disabled);el.disabled=true;}else if('wasDisabled'in el.dataset){el.disabled=el.dataset.wasDisabled==='true';delete el.dataset.wasDisabled;}});}
+async function save(action,payload){
+  if(busy||pending)return;
+  pending={id:crypto.randomUUID(),revision:DATA.revision,action,payload};persistPending();await submitPending();
+}
+async function submitPending(){
+  if(!pending||busy)return;setBusy(true);status('Saving to shared inventory…');message('');
+  try{
+    const response=await gs('mutate',pending);
+    if(!response||typeof response.ok!=='boolean')throw new Error('Save confirmation was not received.');
+    if(!response.ok){
+      if(!response.uncertain){pending=null;persistPending();message(response.error,true);toast(response.error,true);status('Not saved · review the message',true);}
+      else{message(response.error+' Retry the same save to confirm its status.',true);status('Save needs confirmation',true);}
+      return;
+    }
+    validateSnapshot(response.snapshot);pending=null;persistPending();dirty=false;
+    setBusy(false);closeDrawer(true);applySnapshot(response.snapshot);toast(response.result?.message||'Saved');
+  }catch(e){message('Connection interrupted. Your save may already be recorded. Use Retry save; the same request will not be applied twice.',true);status('Save needs confirmation',true);}
+  finally{setBusy(false);pendingUI();}
+}
+function validateQuantities(field){let valid=true;document.querySelectorAll('[data-field="'+field+'"]').forEach(input=>{input.setAttribute('aria-invalid',String(!input.checkValidity()||input.value===''));if(!input.checkValidity()||input.value==='')valid=false;});if(!valid)toast('Enter valid whole quantities within the available balance.',true);return valid;}
+function exportInventory(){const rows=inventoryRows(),headers=['Hub ID','SKU','Item Name','On Hand','Reserved','Available','Status'];const quote=v=>'"'+String(v??'').replace(/^[=+@-]/,"'$&").replace(/"/g,'""')+'"';const csv='\ufeff'+[headers,...rows.map(r=>headers.map(h=>r[h]))].map(r=>r.map(quote).join(',')).join('\r\n');const a=document.createElement('a'),url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.href=url;a.download='immidit-inventory-'+DATA.today+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+const actions={
+  sync:()=>sync(!DATA),retry:submitPending,closeDrawer:()=>closeDrawer(),goIssue:()=>navigate('issue'),
+  receive:()=>{if(!HUB)return toast('Select a working hub first.',true);openDrawer('Receive stock',esc(hubName(HUB))+'. Record purchased stock as it arrives.',`<label>Item<select id="fSku" required>${DATA.items.filter(i=>i.Status==='Active').map(i=>`<option value="${esc(i.SKU)}">${esc(i['Item Name'])}</option>`).join('')}</select></label><label>Quantity<input id="fQty" type="number" min="1" step="1" required></label><label>Invoice / reference<input id="fRef" maxlength="250"></label>`,'submitReceipt','Receive stock');},
+  addNurse:openNurse,addManager:()=>openManager(),editManager:openManager,return:openReturn,offboard:openOffboard,
+  addHub:()=>openDrawer('Add a hub','A new hub starts with zero inventory.',`<label>Hub name<input id="fName" required maxlength="250"></label><label>City<input id="fCity" required maxlength="250"></label>`,'submitHub','Add hub'),
+  archiveHub:id=>{if(confirm('Archive '+hubName(id)+'? History will be retained.'))save('archiveHub',{hubId:id});},
+  openHub:id=>{if(guardDiscard()){HUB=id;$('globalHub').value=id;$('receiveButton').disabled=false;PAGE='dashboard';render();}},
+  closeFor:id=>{if(guardDiscard()){NURSE=id;PAGE='closing';DATE=DATA.today;render();}},stockFor:id=>{if(guardDiscard()){NURSE=id;PAGE='nurseStock';filter='';render();}},oldest:date=>{if(guardDiscard()){DATE=date;render();}},
+  suggest:()=>{document.querySelectorAll('[data-field="Issue"]').forEach(el=>{if(!el.disabled){const r=ROWS[Number(el.dataset.row)];r.Issue=Math.min(r.Suggested,Math.max(0,r.Available));el.value=r.Issue;}});dirty=true;status('Unsaved quantities',true);},
+  saveIssue:()=>{if(validateQuantities('Issue'))save('issue',{nurseId:NURSE,date:DATE,rows:ROWS.map(r=>({SKU:r.SKU,Issue:r.Issue}))});},
+  saveClose:()=>{if(validateQuantities('Closing'))save('close',{nurseId:NURSE,date:DATE,rows:ROWS.map(r=>({SKU:r.SKU,Closing:r.Closing}))});},
+  submitNurse:()=>save('addNurse',{name:$('fName').value,hubId:$('fHub').value,phone:$('fPhone').value,kit:$('fKit').value,area:$('fArea').value}),
+  submitReceipt:()=>save('receive',{hubId:HUB,sku:$('fSku').value,qty:$('fQty').value,reference:$('fRef').value}),
+  submitReturn:()=>{if(validateQuantities('Return'))save('returnStock',{nurseId:NURSE,reason:$('fReason').value,rows:ROWS.map(r=>({SKU:r.SKU,Return:r.Return}))});},
+  submitOffboard:()=>save('offboardNurse',{nurseId:$('fId').value,reason:$('fReason').value}),
+  submitHub:()=>save('addHub',{name:$('fName').value,city:$('fCity').value}),
+  submitManager:()=>{const ids=[...document.querySelectorAll('[name="hubAccess"]:checked')].map(el=>el.value),def=$('fDefault').value;if(!ids.includes(def))return toast('Select the default hub in assigned hubs.',true);save($('fId').value?'updateManager':'addManager',{managerId:$('fId').value,name:$('fName').value,email:$('fEmail').value,hubIds:ids,defaultHubId:def,status:$('fStatus').value});},
+  exportInventory
+};
+function navigate(page){if(!DATA||!guardDiscard())return;PAGE=page;filter='';DATE=DATA.today;message('');render();}
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;if(b.dataset.page)navigate(b.dataset.page);else if(b.dataset.action&&actions[b.dataset.action]){if((busy||pending)&&b.dataset.action!=='retry')return toast('Confirm the pending save first.',true);if(['receive','addNurse','addManager','editManager','return','offboard','addHub','archiveHub'].includes(b.dataset.action)&&!guardDiscard())return;actions[b.dataset.action](b.dataset.id);}});
+document.addEventListener('submit',e=>{if(e.target.id!=='drawerForm')return;e.preventDefault();if(e.target.reportValidity()&&!busy&&!pending)actions[e.target.dataset.submit]();});
+document.addEventListener('input',e=>{
+  const el=e.target;if(el.dataset.row!==undefined){const i=Number(el.dataset.row),field=el.dataset.field;ROWS[i][field]=el.value===''?'':Number(el.value);dirty=true;status('Unsaved quantities',true);el.setAttribute('aria-invalid',String(!el.checkValidity()||el.value===''));if(field==='Closing')$('cons'+i).textContent=el.checkValidity()&&el.value!==''?ROWS[i].Available-num(el.value):'—';if(field==='Issue')$('quantitySummary').textContent=fmt(ROWS.reduce((s,r)=>s+num(r.Issue),0))+' units to issue';}
+  else if(drawerOpen){dirty=true;}else if(el.id==='search'){filter=el.value;if(PAGE==='inventory')renderInventoryRows();if(PAGE==='nurseStock')renderNurseRows();if(PAGE==='team')renderTeamRows();}
+});
+document.addEventListener('change',e=>{const el=e.target;
+  if(el.id==='globalHub'){if(!guardDiscard()){el.value=HUB;return;}HUB=el.value;NURSE='';filter='';DATE=DATA.today;$('receiveButton').disabled=!HUB;render();}
+  if(el.id==='nurseSelect'){if(!guardDiscard()){el.value=NURSE;return;}NURSE=el.value;DATE=DATA.today;render();}
+  if(el.id==='workDate'){if(!el.value){el.value=DATE;return;}if(!guardDiscard()){el.value=DATE;return;}DATE=el.value;render();}
+  if(el.id==='historyDays'){DAYS=Number(el.value);loadHistory();}
+  if(el.id==='stockStatus')renderInventoryRows();if(el.id==='teamStatus'){teamStatus=el.value;renderTeamRows();}
+});
+$('shade').addEventListener('click',()=>closeDrawer());
+document.addEventListener('keydown',e=>{if(!drawerOpen)return;if(e.key==='Escape')closeDrawer();if(e.key==='Tab'){const els=[...$('drawer').querySelectorAll('button,input:not([type=hidden]),select')].filter(e=>!e.disabled);if(!els.length)return;const first=els[0],last=els[els.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===$('drawer'))){last.focus();e.preventDefault();}else if(!e.shiftKey&&document.activeElement===last){first.focus();e.preventDefault();}}});
+window.addEventListener('beforeunload',e=>{if(dirty||pending||busy){e.preventDefault();e.returnValue='';}});
+window.addEventListener('online',()=>{if(!dirty&&!drawerOpen&&!pending)sync(!DATA);});
+window.addEventListener('offline',()=>status('Offline · reconnect before saving',true));
+setInterval(()=>{if(DATA&&!document.hidden&&!dirty&&!drawerOpen&&!busy&&!pending)sync(false,true);},45000);
+sync(true);
+</script><script>document.getElementById('previewRole').onclick=()=>{if(!guardDiscard())return;window.previewRole=window.previewRole==='Admin'?'Manager':'Admin';document.getElementById('previewRole').textContent=window.previewRole==='Admin'?'Try manager view':'Back to admin view';PAGE='dashboard';NURSE='';sync(true);};</script></body></html>
